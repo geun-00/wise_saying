@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import org.example.entity.Wise;
+import org.example.request.Request;
 import org.example.service.WiseService;
 
 import java.util.List;
@@ -31,34 +32,26 @@ public class WiseController {
         System.out.printf("%d번 명언이 등록되었습니다.\n", registeredId);
     }
 
-    public void printList(String command) {
-        String[] queryString = command.split("\\?");
+    public void printList(Request request) {
+        int pageNum = request.getParamAsInt("page", DEFAULT_PAGE_NUMBER);
 
-        if (queryString.length == 1) {
-            printWiseList(wiseService.findAll(), DEFAULT_PAGE_NUMBER);
+        String keywordType = request.getParameter("keywordType", "");
+        String keyword = request.getParameter("keyword", "");
+
+        if (!keywordType.isEmpty() && !keyword.isEmpty()) {
+            if (!validate(keywordType)) {
+                return;
+            }
+
+            System.out.println("----------------------");
+            System.out.println("검색타입 : " + keywordType);
+            System.out.println("검색어 : " + keyword);
+            System.out.println("----------------------");
+            printWiseList(wiseService.findByType(keywordType, keyword), pageNum);
             return;
         }
 
-        if (queryString[1].startsWith("page")) {
-            int pageNum = Integer.parseInt(queryString[1].split("=")[1]);
-            printWiseList(wiseService.findAll(), pageNum);
-            return;
-        }
-
-        String[] params = queryString[1].split("&");
-
-        String keywordType = params[0].split("=")[1];
-
-        if (!validate(keywordType)) return;
-
-        String keyword = params[1].split("=")[1];
-
-        System.out.println("----------------------");
-        System.out.println("검색타입 : " + keywordType);
-        System.out.println("검색어 : " + keyword);
-        System.out.println("----------------------");
-
-        printWiseList(wiseService.findByType(keywordType, keyword), DEFAULT_PAGE_NUMBER);
+        printWiseList(wiseService.findAll(), pageNum);
     }
 
     private static boolean validate(String keywordType) {
@@ -69,9 +62,8 @@ public class WiseController {
         return true;
     }
 
-    public void remove(String command) {
-        Integer targetId = getTargetId(command, "삭제");
-        if (targetId == null) return;
+    public void remove(Request request) {
+        int targetId = getRequestId(request);
 
         itemUpdateProcess(
                 targetId,
@@ -82,9 +74,8 @@ public class WiseController {
         );
     }
 
-    public void modify(String command) {
-        Integer targetId = getTargetId(command, "수정");
-        if (targetId == null) return;
+    public void modify(Request request) {
+        int targetId = getRequestId(request);
 
         itemUpdateProcess(
                 targetId,
@@ -95,15 +86,8 @@ public class WiseController {
         );
     }
 
-    private Integer getTargetId(String command, String str) {
-        String[] queryString = command.split("\\?");
-
-        if (queryString.length == 1) {
-            System.out.printf("%s?id=1 형식으로 입력해 주세요.\n", str);
-            return null;
-        }
-
-        return Integer.parseInt(queryString[1].split("=")[1]);
+    private static int getRequestId(Request request) {
+        return request.getParamAsInt("id", -1);
     }
 
     private void modify(Wise wise, Integer targetId) {

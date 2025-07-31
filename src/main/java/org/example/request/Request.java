@@ -25,15 +25,27 @@ public class Request {
 
     private void parseQueryParams(String queryString) {
         for (String param : queryString.split("&")) {
-            String[] keyValue = param.split("=");
+            String[] keyValue = param.split("=", 2);
+
+            if (keyValue.length < 2) continue;
 
             String key = keyValue[0];
-            String value = keyValue.length > 1 ? keyValue[1] : "";
+            String value = keyValue[1];
             queryParams.put(key, value);
         }
     }
 
-    public String getParameter(String name) {
-        return queryParams.get(name);
+    public String getParameter(String name, String defaultValue) {
+        return queryParams.getOrDefault(name, defaultValue);
+    }
+
+    public int getParamAsInt(String paramName, int defaultValue) {
+        String value = queryParams.get(paramName);
+
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 }

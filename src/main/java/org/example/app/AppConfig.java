@@ -29,4 +29,8 @@ public class AppConfig {
 //        return new FileWiseRepository();
 //        return new DBWiseRepository();
     }
+
+    public Scanner scanner() {
+        return sc;
+    }
 }

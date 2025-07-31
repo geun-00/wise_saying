@@ -160,7 +160,7 @@ public class WiseTest {
     }
 
     private static App initApp(TestConfig config, WiseRepository repository, Scanner scanner) {
-        return App.testApp(
+        return new App(
                 config.wiseController(repository),
                 config.systemController(),
                 repository,

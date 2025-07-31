@@ -4,10 +4,11 @@ public class Main {
     public static void main(String[] args) {
         AppConfig appConfig = new AppConfig();
 
-        App app = App.defaultApp(
+        App app = new App(
                 appConfig.wiseController(),
                 appConfig.systemController(),
-                appConfig.wiseRepository()
+                appConfig.wiseRepository(),
+                appConfig.scanner()
         );
 
         app.run();

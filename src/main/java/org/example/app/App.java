@@ -13,21 +13,11 @@ public class App {
     private final WiseRepository repository;
     private final Scanner sc;
 
-    private App(WiseController wiseController, SystemController systemController, WiseRepository repository, Scanner sc) {
+    public App(WiseController wiseController, SystemController systemController, WiseRepository repository, Scanner sc) {
         this.wiseController = wiseController;
         this.systemController = systemController;
         this.repository = repository;
         this.sc = sc;
-    }
-
-    // 일반 실행용
-    public static App defaultApp(WiseController wiseController, SystemController systemController, WiseRepository repository) {
-        return new App(wiseController, systemController, repository, new Scanner(System.in));
-    }
-
-    // 테스트용
-    public static App testApp(WiseController wiseController, SystemController systemController, WiseRepository repository, Scanner sc) {
-        return new App(wiseController, systemController, repository, sc);
     }
 
     private static final int SAMPLE_ITEM_COUNT = 10;

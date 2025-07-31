@@ -3,7 +3,6 @@ package org.example.repository;
 import org.example.entity.Wise;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,10 +20,7 @@ public class MemoryWiseRepository implements WiseRepository {
 
     @Override
     public List<Wise> findAll() {
-        ArrayList<Wise> wiseList = new ArrayList<>(wises);
-        wiseList.sort((origin, other) -> Integer.compare(other.getId(), origin.getId()));
-
-        return Collections.unmodifiableList(wiseList);
+        return sortAndUnmodifiable(new ArrayList<>(wises));
     }
 
     @Override

@@ -9,7 +9,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class DBWiseRepository implements WiseRepository {
@@ -73,8 +72,7 @@ public class DBWiseRepository implements WiseRepository {
             close(con, pstm, rs);
         }
 
-        wiseList.sort((origin, other) -> Integer.compare(other.getId(), origin.getId()));
-        return Collections.unmodifiableList(wiseList);
+        return sortAndUnmodifiable(wiseList);
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.example.repository;
 
 import org.example.entity.Wise;
 
+import java.util.Collections;
 import java.util.List;
 
 public interface WiseRepository {
@@ -16,4 +17,9 @@ public interface WiseRepository {
     void clear();
 
     default void build() {}
+
+    default List<Wise> sortAndUnmodifiable(List<Wise> wiseList) {
+        wiseList.sort((origin, other) -> Integer.compare(other.getId(), origin.getId()));
+        return Collections.unmodifiableList(wiseList);
+    }
 }

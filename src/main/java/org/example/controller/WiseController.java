@@ -116,8 +116,6 @@ public class WiseController {
         String newAuthor = sc.nextLine().trim();
 
         wiseService.modify(targetId, newContent, newAuthor);
-
-        System.out.printf("%d번 명언이 수정되었습니다.\n", targetId);
     }
 
     private void itemUpdateProcess(Integer targetId, Consumer<Wise> consumer) {

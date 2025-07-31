@@ -7,7 +7,6 @@ public class Main {
         App app = new App(
                 appConfig.wiseController(),
                 appConfig.systemController(),
-                appConfig.wiseRepository(),
                 appConfig.scanner()
         );
 

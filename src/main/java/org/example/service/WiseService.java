@@ -18,7 +18,17 @@ public class WiseService {
     }
 
     public List<Wise> findAll() {
-        return repository.findAll();
+        List<Wise> wiseList = repository.findAll();
+
+        if (wiseList.isEmpty()) {
+            for (int i = 1; i <= 10; i++) {
+                register("작자미상 " + i, "명언 " + i);
+            }
+
+            wiseList = repository.findAll();
+        }
+
+        return wiseList;
     }
 
     public List<Wise> findByType(String keywordType, String keyword) {

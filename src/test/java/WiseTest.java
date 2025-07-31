@@ -163,7 +163,6 @@ public class WiseTest {
         return new App(
                 config.wiseController(repository),
                 config.systemController(),
-                repository,
                 scanner
         );
     }

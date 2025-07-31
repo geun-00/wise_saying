@@ -27,27 +27,13 @@ public class FileWiseRepository implements WiseRepository {
         Path path = Path.of(DB_FOLDER_PATH, id + ".json");
 
         try {
-//            Files.writeString(path, parseJsonWithoutMapper(author, content, id));
-            Files.writeString(path, parseJsonWithMapper(author, content, id));
+            String json = objectMapper.writeValueAsString(new Wise(id, author, content));
+            Files.writeString(path, json);
         } catch (IOException e) {
             System.err.println("명언 저장 중 오류가 발생했습니다");
             e.printStackTrace(System.err);
         }
         return id;
-    }
-
-    private String parseJsonWithMapper(String author, String content, int id) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(new Wise(id, author, content));
-    }
-
-    private static String parseJsonWithoutMapper(String author, String content, int id) {
-        StringBuilder jsonBuilder = new StringBuilder();
-        jsonBuilder.append("{\n")
-                   .append("   \"id\"").append(": ").append(id).append(",\n")
-                   .append("   \"author\"").append(": ").append("\"").append(author).append("\"").append(",\n")
-                   .append("   \"content\"").append(": ").append("\"").append(content).append("\"")
-                   .append("\n}");
-        return jsonBuilder.toString();
     }
 
     @Override
@@ -61,7 +47,7 @@ public class FileWiseRepository implements WiseRepository {
 
             for (File file : files) {
                 String jsonWise = Files.readString(file.toPath());
-                wiseList.add(parseWiseWithMapper(jsonWise));
+                wiseList.add(parseJsonToWise(jsonWise));
             }
         } catch (IOException e) {
             System.err.println("파일을 읽어오는 중 오류가 발생했습니다");
@@ -89,26 +75,9 @@ public class FileWiseRepository implements WiseRepository {
 
         try {
             List<Wise> wiseList = findAll();
-            StringBuilder jsonBuilder = new StringBuilder();
-            jsonBuilder.append("[\n");
 
-            for (int i = 0; i < wiseList.size(); i++) {
-                Wise wise = wiseList.get(i);
-                jsonBuilder.append("  {\n")
-                           .append("    \"id\": ").append(wise.getId()).append(",\n")
-                           .append("    \"content\": \"").append(wise.getContent()).append("\",\n")
-                           .append("    \"author\": \"").append(wise.getAuthor()).append("\"\n")
-                           .append("  }");
-
-                if (i < wiseList.size() - 1) {
-                    jsonBuilder.append(",");
-                }
-                jsonBuilder.append("\n");
-            }
-
-            jsonBuilder.append("]");
-
-            Files.writeString(buildPath, jsonBuilder.toString());
+            String json = objectMapper.writeValueAsString(wiseList);
+            Files.writeString(buildPath, json);
             System.out.println("data.json 파일의 내용이 갱신되었습니다.");
 
         } catch (IOException e) {
@@ -128,8 +97,8 @@ public class FileWiseRepository implements WiseRepository {
             if (files == null) return result;
 
             for (File file : files) {
-                String jsonWise = Files.readString(file.toPath());
-                Wise wise = parseWiseWithMapper(jsonWise);
+                String json = Files.readString(file.toPath());
+                Wise wise = parseJsonToWise(json);
 
                 if ("author".equalsIgnoreCase(type) && wise.getAuthor().contains(keyword)) {
                     result.add(wise);
@@ -149,17 +118,14 @@ public class FileWiseRepository implements WiseRepository {
     public void modify(int id, String newContent, String newAuthor) {
         findById(id).ifPresentOrElse(
                 wise -> {
-                    String updatedAuthor = newAuthor.isEmpty() ? wise.getAuthor() : newAuthor;
-                    String updatedContent = newContent.isEmpty() ? wise.getContent() : newContent;
-
-                    String updatedJson = String.format(
-                            "{\n   \"id\": %d,\n   \"author\": \"%s\",\n   \"content\": \"%s\"\n}",
-                            wise.getId(), updatedAuthor, updatedContent
-                    );
-
-                    Path filePath = Path.of(DB_FOLDER_PATH, id + ".json");
-
                     try {
+                        wise.modifyAuthor(newAuthor.isEmpty() ? wise.getAuthor() : newAuthor);
+                        wise.modifyContent(newContent.isEmpty() ? wise.getContent() : newContent);
+
+                        String updatedJson = objectMapper.writeValueAsString(wise);
+
+                        Path filePath = Path.of(DB_FOLDER_PATH, id + ".json");
+
                         Files.writeString(filePath, updatedJson);
                     } catch (IOException e) {
                         System.err.printf("%d번 명언 수정 중 오류가 발생했습니다: %s\n", id, e.getMessage());
@@ -191,7 +157,6 @@ public class FileWiseRepository implements WiseRepository {
         } catch (IOException e) {
             e.printStackTrace(System.err);
         }
-
     }
 
     private Optional<Wise> findById(int id) {
@@ -199,8 +164,8 @@ public class FileWiseRepository implements WiseRepository {
 
         if (Files.exists(filePath)) {
             try {
-                String jsonWise = Files.readString(filePath);
-                return Optional.of(parseWiseWithMapper(jsonWise));
+                String json = Files.readString(filePath);
+                return Optional.of(parseJsonToWise(json));
             } catch (IOException e) {
                 System.err.printf("%d번 명언을 읽는 중 오류가 발생했습니다: %s\n", id, e.getMessage());
             }
@@ -224,28 +189,7 @@ public class FileWiseRepository implements WiseRepository {
         }
     }
 
-    private Wise parseWiseWithoutMapper(String json) {
-        String[] lines = json.split("\n");
-        int id = 0;
-        String author = null;
-        String content = null;
-
-        for (String line : lines) {
-            line = line.trim();
-
-            if (line.startsWith("\"id\"")) {
-                id = Integer.parseInt(line.split(":")[1].trim().replace(",", ""));
-            } else if (line.startsWith("\"author\"")) {
-                author = line.split(":")[1].trim().replace("\"", "").replace(",", "");
-            } else if (line.startsWith("\"content\"")) {
-                content = line.split(":")[1].trim().replace("\"", "").replace(",", "");
-            }
-        }
-
-        return new Wise(id, author, content);
-    }
-
-    private Wise parseWiseWithMapper(String json) {
+    private Wise parseJsonToWise(String json) {
         try {
             return objectMapper.readValue(json, Wise.class);
         } catch (JsonProcessingException e) {
@@ -253,5 +197,4 @@ public class FileWiseRepository implements WiseRepository {
             throw new RuntimeException(e);
         }
     }
-
 }

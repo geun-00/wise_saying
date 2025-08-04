@@ -1,5 +1,7 @@
 package org.example.app;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.example.controller.SystemController;
 import org.example.controller.WiseController;
 import org.example.repository.MemoryWiseRepository;
@@ -26,11 +28,17 @@ public class AppConfig {
 
     public WiseRepository wiseRepository() {
         return new MemoryWiseRepository();
-//        return new FileWiseRepository();
+//        return new FileWiseRepository(objectMapper());
 //        return new DBWiseRepository();
     }
 
     public Scanner scanner() {
         return sc;
+    }
+
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        return objectMapper;
     }
 }

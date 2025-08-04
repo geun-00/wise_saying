@@ -122,7 +122,7 @@ public class WiseController {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("번호 / 작가 / 명언\n")
+        sb.append("번호 / 작가 / 명언 / 작성일 / 수정일\n")
           .append("----------------------\n");
 
         int from = (pageNum - 1) * MAX_PAGE_ITEMS;
@@ -132,7 +132,9 @@ public class WiseController {
              .forEach(wise -> sb
                      .append(wise.getId()).append(" / ")
                      .append(wise.getAuthor()).append(" / ")
-                     .append(wise.getContent()).append("\n")
+                     .append(wise.getContent()).append(" / ")
+                     .append(wise.getFormattedCreatedAt()).append(" / ")
+                     .append(wise.getFormattedModifiedAt()).append("\n")
              );
 
         sb.append("----------------------\n")

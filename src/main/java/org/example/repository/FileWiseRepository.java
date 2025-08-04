@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,12 @@ public class FileWiseRepository implements WiseRepository {
     private static final String DB_FOLDER_PATH = "src\\main\\java\\org\\example\\db\\wiseSaying\\";
     private static final String DATA_BUILD_PATH = DB_FOLDER_PATH + "data.json";
     private static final String LAST_ID_FILE_PATH = DB_FOLDER_PATH + "lastId.txt";
-    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final ObjectMapper objectMapper;
+
+    public FileWiseRepository(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public int register(String author, String content) {
@@ -26,7 +32,7 @@ public class FileWiseRepository implements WiseRepository {
         Path path = Path.of(DB_FOLDER_PATH, id + ".json");
 
         try {
-            String json = objectMapper.writeValueAsString(new Wise(id, author, content));
+            String json = objectMapper.writeValueAsString(Wise.createWise(id, author, content));
             Files.writeString(path, json);
         } catch (IOException e) {
             System.err.println("명언 저장 중 오류가 발생했습니다");
@@ -119,6 +125,7 @@ public class FileWiseRepository implements WiseRepository {
                     try {
                         wise.modifyAuthor(newAuthor.isEmpty() ? wise.getAuthor() : newAuthor);
                         wise.modifyContent(newContent.isEmpty() ? wise.getContent() : newContent);
+                        wise.setModifiedAt(LocalDateTime.now());
 
                         String updatedJson = objectMapper.writeValueAsString(wise);
 

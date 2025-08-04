@@ -2,6 +2,7 @@ package org.example.repository;
 
 import org.example.entity.Wise;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,7 +14,7 @@ public class MemoryWiseRepository implements WiseRepository {
 
     @Override
     public int register(String author, String content) {
-        Wise registeredWise = new Wise(idGenerator.getAndIncrement(), author, content);
+        Wise registeredWise = Wise.createWise(idGenerator.getAndIncrement(), author, content);
         wises.add(registeredWise);
         return registeredWise.getId();
     }
@@ -37,6 +38,7 @@ public class MemoryWiseRepository implements WiseRepository {
                      wise -> {
                          if (!newContent.isEmpty()) wise.modifyContent(newContent);
                          if (!newAuthor.isEmpty()) wise.modifyAuthor(newAuthor);
+                         wise.setModifiedAt(LocalDateTime.now());
                      }
              );
     }

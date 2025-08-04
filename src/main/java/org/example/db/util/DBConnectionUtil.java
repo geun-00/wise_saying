@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public abstract class DBConnectionUtil {
 
-    private static final String URL = "jdbc:mysql://localhost:3307/wisedb";
+    private static final String URL = "jdbc:mysql://localhost:3306/wisedb";
     private static final String USER = "root";
     private static final String PASSWORD = "1234";
 

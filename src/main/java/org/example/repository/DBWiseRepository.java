@@ -8,25 +8,32 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DBWiseRepository implements WiseRepository {
 
-    private static final String INSERT_QUERY = "INSERT INTO wise(author, content) VALUES ( ?, ? )";
+    private static final String INSERT_QUERY = "INSERT INTO wise(author, content, created_at, modified_at) VALUES ( ?, ?, ?, ? )";
     private static final String FIND_ALL_QUERY = "SELECT * FROM wise";
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM wise WHERE id = ?";
     private static final String DELETE_ALL_QUERY = "DELETE FROM wise";
     private static final String FIND_BY_TYPE_QUERY_PREFIX = "SELECT * FROM wise WHERE ";
-    private static final String UPDATE_QUERY = "UPDATE wise SET content = ?, author = ? WHERE id = ?";
+    private static final String UPDATE_QUERY = "UPDATE wise SET content = ?, author = ?, modified_at = ? WHERE id = ?";
 
     @Override
     public int register(String author, String content) {
         try (Connection con = getConnection();
              PreparedStatement pstm = con.prepareStatement(INSERT_QUERY, Statement.RETURN_GENERATED_KEYS)) {
 
+            LocalDateTime now = LocalDateTime.now();
+
             pstm.setString(1, author);
             pstm.setString(2, content);
+            pstm.setTimestamp(3, Timestamp.valueOf(now));
+            pstm.setTimestamp(4, Timestamp.valueOf(now));
+
             pstm.executeUpdate();
 
             ResultSet rs = pstm.getGeneratedKeys();
@@ -94,7 +101,8 @@ public class DBWiseRepository implements WiseRepository {
 
             pstm.setString(1, newContent);
             pstm.setString(2, newAuthor);
-            pstm.setInt(3, id);
+            pstm.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            pstm.setInt(4, id);
 
             pstm.executeUpdate();
 
@@ -120,9 +128,10 @@ public class DBWiseRepository implements WiseRepository {
             int id = rs.getInt("id");
             String author = rs.getString("author");
             String content = rs.getString("content");
+            LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
+            LocalDateTime modifiedAt = rs.getTimestamp("modified_at").toLocalDateTime();
 
-            Wise wise = new Wise(id, author, content);
-            wiseList.add(wise);
+            wiseList.add(new Wise(id, author, content, createdAt, modifiedAt));
         }
     }
 
